@@ -5,26 +5,26 @@ import logo from '../assets/logo/Salic_bilingual_centered_logo.svg';
 import salic_bg from '../assets/images/salic-brand-shape_1.svg';
 import { Rating } from '@smastrom/react-rating';
 import '@smastrom/react-rating/style.css';
-import { HappyFace, NeutralFace, SadFace, SmilingFace } from "../utils/faces-icons";
+import { HappyFace, NeutralFace, SadFace, SmilingFace, VeryHappyFace } from "../utils/faces-icons";
 import SuccessFeedback from './SuccessFeedback';
 import axios from 'axios';
 import { apiUrl } from '../main';
 
 const customStyles = {
-  itemShapes: [SadFace, NeutralFace, SmilingFace, HappyFace],
-  activeFillColor: ['#D33535', '#F7B801', '#339BD6', '#2A7C62'],
+  itemShapes: [SadFace, NeutralFace, SmilingFace, HappyFace, VeryHappyFace],
+  activeFillColor: ['#D33535', '#DF7A11', '#F7B801', '#339BD6', '#2A7C62'],
   inactiveFillColor: '#a8a8a8',
 };
 
 
-const TakingFeedback = ({ _KEY, onSubmit, RequestType, RequestId }) => {
+const TakingFeedback = ({ _KEY, onSubmit, Label, Title, DirectUrl }) => {
   const [rating, setRating] = React.useState(0);
   const [feedback, setFeedback] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
   const toast = useToast();
   const CUSTOM_GROUP_LABEL_ID = 'group_label';
-  const CUSTOM_ITEM_LABELS = ['Bad', 'Average', 'Good', 'Excellent'];
-  const CUSTOM_ITEM_LABELS_IDS = ['label_1', 'label_2', 'label_3', 'label_4'];
+  const CUSTOM_ITEM_LABELS = ['Hesitant', 'Curious', 'Content', 'Pleased', 'Ecstatic'];
+  const CUSTOM_ITEM_LABELS_IDS = ['label_1', 'label_2', 'label_3', 'label_4', 'label_4'];
   
   const handleSubmit = async () => {
     try {
@@ -76,26 +76,25 @@ const TakingFeedback = ({ _KEY, onSubmit, RequestType, RequestId }) => {
             <Table>
               <Thead>
                 <Tr>
-                  <Th>Type</Th>
-                  <Th>Request</Th>
-                  <Th isNumeric>Link</Th>
+                  <Th className='w-[10%]'>Type</Th>
+                  <Th className='w-[80%]'>Request</Th>
+                  <Th className='w-[10%]' isNumeric>Link</Th>
                 </Tr>
               </Thead>
               <Tbody >
                 <Tr>
                   <Td className='!border-none'>
-                    <Tooltip label={`${RequestType}: #${RequestId}`} placement="top" hasArrow>
-                      <Kbd>{RequestType}#{RequestId}</Kbd>
+                    <Tooltip label={`${Label}`} placement="top" hasArrow>
+                      <Kbd>{Label}</Kbd>
                     </Tooltip>
                   </Td>
                   <Td className='!border-none'>
                     <p className='whitespace-break-spaces'>
-                      {/* <Kbd className='mb-1 inline-block'>#INC-0010</Kbd> <br /> */}
-                      There was a potential cyber threat on SALIC systems through Nournet.
+                      {Title}
                     </p>
                   </Td>
                   <Td isNumeric className='!border-none'>
-                    <ChakraLink href='https://google.com' isExternal className='!text-sky_blue'>
+                    <ChakraLink href={DirectUrl} isExternal className='!text-sky_blue'>
                       View
                     </ChakraLink>
                   </Td>
@@ -105,13 +104,13 @@ const TakingFeedback = ({ _KEY, onSubmit, RequestType, RequestId }) => {
           </TableContainer>
         </div>
 
-        <div className='mb-10 max-w-lg mx-auto'>
+        <div className='mb-10 max-w-2xl mx-auto'>
           <Rating
             value={rating}
             onChange={setRating}
             visibleLabelId={CUSTOM_GROUP_LABEL_ID}
             visibleItemLabelIds={CUSTOM_ITEM_LABELS_IDS}
-            items={4}
+            items={5}
             itemStyles={customStyles}
             highlightOnlySelected
             spaceBetween="medium"
@@ -119,7 +118,7 @@ const TakingFeedback = ({ _KEY, onSubmit, RequestType, RequestId }) => {
             className='rating-component'
             isDisabled={isLoading}
           />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', justifyItems: 'center' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', justifyItems: 'center' }}>
             {CUSTOM_ITEM_LABELS.map((label, index) => (
               <span
                 key={label}
@@ -133,16 +132,16 @@ const TakingFeedback = ({ _KEY, onSubmit, RequestType, RequestId }) => {
           </div>
         </div>
 
-        <div>
+        <div className='w-full text-left'>
           <Text as="label" htmlFor='feedback' className='mb-2 inline-block'>
-            <span className={`text-cu_danger ${rating>2 ? "hidden" : ""}`}>*</span> What you like us to improve?
+            <span className={`text-cu_danger ${rating>2 ? "hidden" : ""}`}>*</span> Write your feedback
           </Text>
           <Textarea
             id='feedback'
             colorScheme='brandDarkBlue'
-            className='text-center'
+            className='w-full'
             rows={4} cols={40}
-            placeholder='Write your feedback here...'
+            placeholder='Write here'
             value={feedback}
             size={{ base: 'sm', lg: 'md' }}
             disabled={isLoading}
@@ -176,7 +175,7 @@ const Index = ({ _KEY }) => {
       const newStat = {
         data: response.data?.Data,
         isLoading: false,
-        isSubmitted: response.data?.Data?.Rate !== null,
+        isSubmitted: response.data?.Data?.value !== null,
         isError: false,
       };
       setStat(newStat);
@@ -220,11 +219,22 @@ const Index = ({ _KEY }) => {
     return <SuccessFeedback />
   } 
 
+  const _GetLinkBasedOnType = (type, id) => {
+    switch (type) {
+      case 'SR':
+        return `https://devsalic.sharepoint.com/sites/Portal/SitePages/Home.aspx/services-requests/${id}`;
+      default:
+        return '';
+    }
+  }
+
+
   return (
     <TakingFeedback 
       _KEY={_KEY}
-      RequestType={stat.data?.RequestType}
-      RequestId={stat.data?.ReferenceNumber}
+      Title={stat.data?.title}
+      Label={stat.data?.label}
+      DirectUrl={_GetLinkBasedOnType(stat.data?.type, stat.data?.referenceNumber)}
       onSubmit={handleAfterSubmit} 
     />
   )
